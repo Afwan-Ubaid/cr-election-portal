@@ -10,7 +10,7 @@ export function ZainabAvatar({ className = '', active = false, ...props }: Avata
   return (
     <svg
       viewBox="0 0 120 120"
-      className={`sketch-element w-full h-full fill-none stroke-current text-slate-800 ${className} ${active ? 'wiggle-active' : ''}`}
+      className={`w-full h-full fill-none stroke-current text-slate-800 ${className} ${active ? 'wiggle-active' : ''}`}
       strokeWidth="2.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -50,7 +50,7 @@ export function HamzaAvatar({ className = '', active = false, ...props }: Avatar
   return (
     <svg
       viewBox="0 0 120 120"
-      className={`sketch-element w-full h-full fill-none stroke-current text-slate-800 ${className} ${active ? 'wiggle-active' : ''}`}
+      className={`w-full h-full fill-none stroke-current text-slate-800 ${className} ${active ? 'wiggle-active' : ''}`}
       strokeWidth="2.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -87,7 +87,7 @@ export function AyeshaAvatar({ className = '', active = false, ...props }: Avata
   return (
     <svg
       viewBox="0 0 120 120"
-      className={`sketch-element w-full h-full fill-none stroke-current text-slate-800 ${className} ${active ? 'wiggle-active' : ''}`}
+      className={`w-full h-full fill-none stroke-current text-slate-800 ${className} ${active ? 'wiggle-active' : ''}`}
       strokeWidth="2.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -134,7 +134,7 @@ export function DynamicAvatar({ avatarId, className = '', active = false }: { av
     default:
       // Fallback wobbly default doodle
       return (
-        <svg viewBox="0 0 120 120" className={`sketch-element stroke-current text-slate-800 fill-none ${className}`} strokeWidth="2.5">
+        <svg viewBox="0 0 120 120" className={`stroke-current text-slate-800 fill-none ${className}`} strokeWidth="2.5">
           <circle cx="60" cy="60" r="35" />
           <circle cx="48" cy="52" r="3" className="fill-slate-800" />
           <circle cx="72" cy="52" r="3" className="fill-slate-800" />

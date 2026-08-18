@@ -72,7 +72,7 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
         id="login-form-container"
         initial={{ scale: 0.9, opacity: 0, rotate: -2 }}
         animate={{ scale: 1, opacity: 1, rotate: 0 }}
-        className="w-full max-w-md bg-white p-8 border-3 border-slate-800 shadow-[8px_8px_0px_0px_rgba(44,44,44,1)] rounded-sm relative sketch-element paper-texture"
+        className="w-full max-w-md bg-white p-5 sm:p-8 border-3 border-slate-800 shadow-[8px_8px_0px_0px_rgba(44,44,44,1)] rounded-sm relative sketch-element paper-texture"
       >
         {/* Binder Holes */}
         <div className="absolute left-3 top-10 flex flex-col space-y-16 pointer-events-none">

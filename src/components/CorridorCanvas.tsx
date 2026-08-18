@@ -32,7 +32,7 @@ const getCandidateX = (index: number, total: number) => {
 
 // Camera control rig for smooth horizontal panning transitions
 function CameraRig({ focusIndex, candidatesCount }: { focusIndex: number; candidatesCount: number }) {
-  const { camera } = useThree();
+  const { camera, size } = useThree();
   const lerpTargetLookAt = useRef(new THREE.Vector3(0, 1, 0));
 
   useFrame(() => {
@@ -41,19 +41,20 @@ function CameraRig({ focusIndex, candidatesCount }: { focusIndex: number; candid
     let targetZ = 3.6;
     const targetLookAt = new THREE.Vector3(0, 0.95, 0);
 
+    const isMobile = size.width < 600;
+
     if (focusIndex === -1) {
       // Hallway entrance overview (shows all side-by-side)
       targetX = 0;
-      targetY = 1.45;
-      targetZ = 4.2;
+      targetY = isMobile ? 1.65 : 1.45;
+      targetZ = isMobile ? 6.2 : 4.2; // Zoom out further on mobile so all posters fit side-by-side!
       targetLookAt.set(0, 0.95, 0);
     } else {
-      // Focus directly in front of the specific candidate (perfectly aligned, no rotation distortions)
+      // Focus directly in front of the specific candidate
       const xPos = getCandidateX(focusIndex, candidatesCount);
       targetX = xPos;
       targetY = 1.1;
-      targetZ = 1.95; // centered zoom-in
-
+      targetZ = isMobile ? 2.45 : 1.95; // Zoom out slightly on mobile when focused to prevent clipping poster edges
       targetLookAt.set(xPos, 1.05, 0);
     }
 

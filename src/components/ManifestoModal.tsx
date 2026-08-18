@@ -73,7 +73,7 @@ export default function ManifestoModal({
         initial={{ y: 50, scale: 0.9, opacity: 0, rotate: -1 }}
         animate={{ y: 0, scale: 1, opacity: 1, rotate: 1 }}
         exit={{ y: 50, scale: 0.9, opacity: 0 }}
-        className="w-full max-w-lg bg-[#fffdf0] border-3 border-slate-800 p-8 shadow-[8px_8px_0px_0px_rgba(44,44,44,1)] relative sketch-element paper-texture"
+        className="w-full max-w-lg bg-[#fffdf0] border-3 border-slate-800 p-5 sm:p-8 shadow-[8px_8px_0px_0px_rgba(44,44,44,1)] relative sketch-element paper-texture"
         style={{
           backgroundImage: 'linear-gradient(rgba(0, 0, 255, 0.05) 1px, transparent 1px)',
           backgroundSize: '100% 24px',

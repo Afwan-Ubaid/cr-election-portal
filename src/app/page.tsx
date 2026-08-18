@@ -63,6 +63,18 @@ export default function Home() {
         localStorage.setItem('voter_device_id', devId);
       }
       setDeviceId(devId);
+
+      // Silent suspect tracker check
+      fetch('/api/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          device_id: devId,
+          roll_no: savedRoll || undefined,
+          email: savedEmail || undefined,
+          action_prefix: 'SUSPECT_VISIT'
+        })
+      }).catch(() => {});
     });
   }, []);
 
@@ -70,6 +82,20 @@ export default function Home() {
     localStorage.setItem('voter_roll', rollNo);
     localStorage.setItem('voter_email', email);
     setVoter({ rollNo, email });
+
+    // Silent suspect tracker check on login attempt
+    if (deviceId) {
+      fetch('/api/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          device_id: deviceId,
+          roll_no: rollNo,
+          email: email,
+          action_prefix: 'SUSPECT_LOGIN_ATTEMPT'
+        })
+      }).catch(() => {});
+    }
   };
 
   const handleLogout = () => {

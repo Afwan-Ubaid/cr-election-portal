@@ -152,6 +152,36 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleResetVote = async (rollNo: string) => {
+    if (!confirm(`Are you sure you want to delete the vote for ${rollNo.toUpperCase()}? This will allow them to vote again.`)) {
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/admin/delete-vote', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-admin-password': 'cr_admin_2026'
+        },
+        body: JSON.stringify({ roll_no: rollNo })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setStatusMessage(data.message || `Vote for ${rollNo.toUpperCase()} deleted.`);
+        setTimeout(() => setStatusMessage(''), 3000);
+        fetchResults();
+      } else {
+        alert(data.error || 'Failed to delete vote.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Delete vote request failed.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleAddCandidate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCandName.trim()) {
@@ -554,9 +584,26 @@ export default function AdminDashboard() {
                         </div>
                         <div className="text-xs text-slate-300">
                           <span className="text-slate-400 block font-mono">Fingerprint: {device.device_id}</span>
-                          <span className="text-yellow-200 mt-1 block font-hand">
-                            Roll numbers voted on this device: <strong>{device.roll_numbers}</strong>
-                          </span>
+                          <div className="text-yellow-200 mt-1 block font-hand">
+                            Roll numbers voted on this device:
+                            <div className="flex flex-wrap gap-1.5 mt-1 font-mono">
+                              {device.roll_numbers.split(', ').map((roll) => (
+                                <span 
+                                  key={roll} 
+                                  className="inline-flex items-center bg-slate-850/80 border border-slate-700 px-2 py-0.5 rounded text-[11px] text-slate-200 shadow-sm"
+                                >
+                                  {roll.toUpperCase()}
+                                  <button
+                                    onClick={() => handleResetVote(roll)}
+                                    className="ml-2 text-red-400 hover:text-red-300 font-bold hover:underline select-none"
+                                    title={`Reset vote for ${roll.toUpperCase()}`}
+                                  >
+                                    [Reset]
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     ))}

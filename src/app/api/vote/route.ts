@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
     } finally {
       client.release();
     }
-  } catch (err: any) {
+  } catch (err) {
     console.error('Submission error:', err);
     return NextResponse.json({ error: 'Internal server error processing your vote.' }, { status: 500 });
   }

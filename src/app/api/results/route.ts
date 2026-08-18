@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
     } finally {
       client.release();
     }
-  } catch (err: any) {
+  } catch (err) {
     console.error('Failed to retrieve results:', err);
     return NextResponse.json({ error: 'Internal server error fetching results.' }, { status: 500 });
   }

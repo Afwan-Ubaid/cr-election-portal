@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     } finally {
       client.release();
     }
-  } catch (err: any) {
+  } catch (err) {
     console.error('Failed to toggle poll status:', err);
     return NextResponse.json({ error: 'Failed to update election status' }, { status: 500 });
   }

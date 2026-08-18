@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { DynamicAvatar } from './DoodleAvatars';
 
 interface Candidate {
@@ -60,9 +60,9 @@ export default function ManifestoModal({
       }
 
       onVoteSuccess(candidate.name);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setError(err.message || 'Network error occurred. Please try again.');
+      setError((err as Error).message || 'Network error occurred. Please try again.');
       setIsSubmitting(false);
     }
   };

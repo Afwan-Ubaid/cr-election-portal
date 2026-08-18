@@ -45,23 +45,25 @@ export default function Home() {
   const [deviceId, setDeviceId] = useState('');
 
   useEffect(() => {
-    fetchElectionData();
-    // Load session if exists
-    const savedRoll = localStorage.getItem('voter_roll');
-    const savedEmail = localStorage.getItem('voter_email');
-    if (savedRoll && savedEmail) {
-      setVoter({ rollNo: savedRoll, email: savedEmail });
-    }
+    Promise.resolve().then(() => {
+      fetchElectionData();
+      // Load session if exists
+      const savedRoll = localStorage.getItem('voter_roll');
+      const savedEmail = localStorage.getItem('voter_email');
+      if (savedRoll && savedEmail) {
+        setVoter({ rollNo: savedRoll, email: savedEmail });
+      }
 
-    // Load or generate unique browser device fingerprint
-    let devId = localStorage.getItem('voter_device_id');
-    if (!devId) {
-      devId = typeof crypto !== 'undefined' && crypto.randomUUID 
-        ? crypto.randomUUID() 
-        : Math.random().toString(36).substring(2) + Date.now().toString(36);
-      localStorage.setItem('voter_device_id', devId);
-    }
-    setDeviceId(devId);
+      // Load or generate unique browser device fingerprint
+      let devId = localStorage.getItem('voter_device_id');
+      if (!devId) {
+        devId = typeof crypto !== 'undefined' && crypto.randomUUID 
+          ? crypto.randomUUID() 
+          : Math.random().toString(36).substring(2) + Date.now().toString(36);
+        localStorage.setItem('voter_device_id', devId);
+      }
+      setDeviceId(devId);
+    });
   }, []);
 
   const handleLogin = (rollNo: string, email: string) => {

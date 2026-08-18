@@ -24,7 +24,7 @@ export default function PaperLoader({ onComplete }: { onComplete: () => void }) 
   // Sound effect helper (sfx representation)
   const playTearSound = () => {
     try {
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audioCtx = new (window.AudioContext || (window as Window & { webkitAudioContext?: new () => AudioContext }).webkitAudioContext)();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       
@@ -39,7 +39,7 @@ export default function PaperLoader({ onComplete }: { onComplete: () => void }) 
       gain.connect(audioCtx.destination);
       osc.start();
       osc.stop(audioCtx.currentTime + 0.4);
-    } catch (e) {
+    } catch {
       console.warn('AudioContext not supported or allowed yet');
     }
   };

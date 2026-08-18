@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { DynamicAvatar } from '@/components/DoodleAvatars';
 
@@ -50,7 +51,9 @@ export default function AdminDashboard() {
   // 1. Password check on mount
   useEffect(() => {
     if (localStorage.getItem('admin_authenticated') === 'true') {
-      setIsAuthenticated(true);
+      Promise.resolve().then(() => {
+        setIsAuthenticated(true);
+      });
     }
   }, []);
 
@@ -92,11 +95,15 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchResults();
+      Promise.resolve().then(() => {
+        fetchResults();
+      });
       const interval = setInterval(fetchResults, 5000);
       return () => clearInterval(interval);
     } else {
-      setIsLoading(false);
+      Promise.resolve().then(() => {
+        setIsLoading(false);
+      });
     }
   }, [isAuthenticated]);
 
@@ -270,9 +277,9 @@ export default function AdminDashboard() {
             </button>
           </form>
           <div className="mt-8">
-            <a href="/" className="text-xs text-yellow-300/60 hover:text-yellow-300 hover:underline">
+            <Link href="/" className="text-xs text-yellow-300/60 hover:text-yellow-300 hover:underline">
               ← Go back to Student Voting booth
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -564,12 +571,12 @@ export default function AdminDashboard() {
 
         {/* Back Link */}
         <div className="mt-8 border-t border-dashed border-slate-500 pt-6 text-center">
-          <a
+          <Link
             href="/"
             className="inline-block py-2 px-6 border-2 border-yellow-300/50 text-yellow-300 hover:text-yellow-100 hover:border-yellow-200 rounded-sm font-sketch transition-all"
           >
             ← Back to Main Voting Portal
-          </a>
+          </Link>
         </div>
 
       </div>

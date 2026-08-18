@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     } finally {
       client.release();
     }
-  } catch (err: any) {
+  } catch (err) {
     console.error('Failed to fetch candidates:', err);
     return NextResponse.json({ error: 'Failed to fetch candidates' }, { status: 500 });
   }
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     } finally {
       client.release();
     }
-  } catch (err: any) {
+  } catch (err) {
     console.error('Failed to add candidate:', err);
     return NextResponse.json({ error: 'Failed to add candidate' }, { status: 500 });
   }
@@ -87,7 +87,7 @@ export async function DELETE(req: NextRequest) {
     } finally {
       client.release();
     }
-  } catch (err: any) {
+  } catch (err) {
     console.error('Failed to delete candidate:', err);
     return NextResponse.json({ error: 'Failed to delete candidate' }, { status: 500 });
   }

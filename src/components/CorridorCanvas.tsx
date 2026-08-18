@@ -39,7 +39,7 @@ function CameraRig({ focusIndex, candidatesCount }: { focusIndex: number; candid
     let targetX = 0;
     let targetY = 1.4;
     let targetZ = 3.6;
-    let targetLookAt = new THREE.Vector3(0, 0.95, 0);
+    const targetLookAt = new THREE.Vector3(0, 0.95, 0);
 
     if (focusIndex === -1) {
       // Hallway entrance overview (shows all side-by-side)

@@ -12,6 +12,8 @@ interface VoteSuccessProps {
 }
 
 export default function VoteSuccess({ candidateName, rollNo, email, onReset }: VoteSuccessProps) {
+  const [receiptNo] = React.useState(() => Math.floor(100000 + Math.random() * 900000));
+
   useEffect(() => {
     // Trigger confetti explosion on mount
     const duration = 2.5 * 1000;
@@ -88,7 +90,7 @@ export default function VoteSuccess({ candidateName, rollNo, email, onReset }: V
           <div className="border-t-2 border-b-2 border-dashed border-slate-300 py-4 my-6 text-left space-y-3 font-mono text-sm text-slate-700">
             <div className="flex justify-between">
               <span className="text-slate-400">RECEIPT NO:</span>
-              <span className="font-bold">#{Math.floor(100000 + Math.random() * 900000)}</span>
+              <span className="font-bold">#{receiptNo}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-400">VOTER ID:</span>

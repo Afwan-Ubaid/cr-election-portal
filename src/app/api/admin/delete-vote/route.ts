@@ -5,7 +5,8 @@ export async function POST(req: NextRequest) {
   try {
     // 1. Password verification check
     const adminPassword = req.headers.get('x-admin-password');
-    if (adminPassword !== 'cr_admin_2026') {
+    const expectedPassword = process.env.ADMIN_PASSWORD || 'cr_admin_2026';
+    if (adminPassword !== expectedPassword) {
       return NextResponse.json({ error: 'Unauthorized admin access.' }, { status: 401 });
     }
 

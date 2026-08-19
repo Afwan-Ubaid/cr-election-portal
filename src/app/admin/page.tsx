@@ -57,19 +57,32 @@ export default function AdminDashboard() {
     }
   }, []);
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordInput === 'cr_admin_2026') {
-      setIsAuthenticated(true);
-      setPasswordError('');
-      localStorage.setItem('admin_authenticated', 'true');
-    } else {
-      setPasswordError('Incorrect admin password. Please try again.');
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: passwordInput })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setIsAuthenticated(true);
+        setPasswordError('');
+        localStorage.setItem('admin_authenticated', 'true');
+        localStorage.setItem('admin_password', passwordInput);
+      } else {
+        setPasswordError(data.error || 'Incorrect admin password. Please try again.');
+      }
+    } catch (err) {
+      console.error(err);
+      setPasswordError('Server connection failed. Please try again.');
     }
   };
 
   const handleAdminLogout = () => {
     localStorage.removeItem('admin_authenticated');
+    localStorage.removeItem('admin_password');
     setIsAuthenticated(false);
     setPasswordInput('');
   };
@@ -108,12 +121,13 @@ export default function AdminDashboard() {
   }, [isAuthenticated]);
 
   const handleTogglePoll = async (open: boolean) => {
+    const adminPassword = localStorage.getItem('admin_password') || '';
     try {
       const res = await fetch('/api/admin/toggle', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'x-admin-password': 'cr_admin_2026'
+          'x-admin-password': adminPassword
         },
         body: JSON.stringify({ is_active: open })
       });
@@ -132,10 +146,11 @@ export default function AdminDashboard() {
   const handleSetupDatabase = async () => {
     if (!confirm('This will wipe all active votes and restart all counts back to zero. Are you sure?')) return;
     setIsLoading(true);
+    const adminPassword = localStorage.getItem('admin_password') || '';
     try {
       const res = await fetch('/api/admin/setup', { 
         method: 'POST',
-        headers: { 'x-admin-password': 'cr_admin_2026' }
+        headers: { 'x-admin-password': adminPassword }
       });
       const data = await res.json();
       if (res.ok) {
@@ -157,12 +172,13 @@ export default function AdminDashboard() {
       return;
     }
     setIsLoading(true);
+    const adminPassword = localStorage.getItem('admin_password') || '';
     try {
       const res = await fetch('/api/admin/delete-vote', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'x-admin-password': 'cr_admin_2026'
+          'x-admin-password': adminPassword
         },
         body: JSON.stringify({ roll_no: rollNo })
       });
@@ -190,13 +206,14 @@ export default function AdminDashboard() {
     }
     setIsAdding(true);
     setFormError('');
+    const adminPassword = localStorage.getItem('admin_password') || '';
 
     try {
       const res = await fetch('/api/candidates', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'x-admin-password': 'cr_admin_2026'
+          'x-admin-password': adminPassword
         },
         body: JSON.stringify({
           name: newCandName,
@@ -225,10 +242,11 @@ export default function AdminDashboard() {
 
   const handleDeleteCandidate = async (id: string) => {
     if (!confirm('Are you sure you want to delete this candidate? This will also remove any votes they have received.')) return;
+    const adminPassword = localStorage.getItem('admin_password') || '';
     try {
       const res = await fetch(`/api/candidates?id=${id}`, { 
         method: 'DELETE',
-        headers: { 'x-admin-password': 'cr_admin_2026' }
+        headers: { 'x-admin-password': adminPassword }
       });
       const data = await res.json();
       if (res.ok) {

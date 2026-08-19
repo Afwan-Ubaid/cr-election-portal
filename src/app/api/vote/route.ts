@@ -54,6 +54,14 @@ export async function POST(req: NextRequest) {
 
     const client = await pool.connect();
     try {
+      // 0. Check if device is locked down
+      const lockCheck = await client.query('SELECT reason FROM locked_devices WHERE device_id = $1', [cleanDevice]);
+      if (lockCheck.rows.length > 0) {
+        return NextResponse.json({ 
+          error: `🚨 DEVICE LOCKDOWN: This device has been permanently locked down due to suspicious activities.` 
+        }, { status: 403 });
+      }
+
       // 3. Strict Voter List Check (Checks if roll number is in the pre-seeded classroom list)
       const voterCheck = await client.query('SELECT roll_no FROM eligible_voters WHERE roll_no = $1', [cleanRoll]);
       if (voterCheck.rows.length === 0) {

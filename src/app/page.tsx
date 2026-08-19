@@ -24,6 +24,8 @@ export default function Home() {
   const [votedCandidateName, setVotedCandidateName] = useState<string | null>(null);
   const [poll, setPoll] = useState<{ id: string; title: string; is_active: boolean } | null>(null);
   const [totalVotes, setTotalVotes] = useState(0);
+  const [isLockedDown, setIsLockedDown] = useState(false);
+  const [lockdownMessage, setLockdownMessage] = useState('');
 
   // 1. Fetch Candidates and Results on load
   const fetchElectionData = async () => {
@@ -64,6 +66,19 @@ export default function Home() {
       }
       setDeviceId(devId);
 
+      // Check if device is locked down
+      if (devId) {
+        fetch(`/api/auth/check-lockdown?device_id=${devId}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.locked) {
+              setIsLockedDown(true);
+              setLockdownMessage(data.message);
+            }
+          })
+          .catch(() => {});
+      }
+
       // Silent suspect tracker check
       fetch('/api/track', {
         method: 'POST',
@@ -78,23 +93,33 @@ export default function Home() {
     });
   }, []);
 
-  const handleLogin = (rollNo: string, email: string) => {
-    localStorage.setItem('voter_roll', rollNo);
-    localStorage.setItem('voter_email', email);
-    setVoter({ rollNo, email });
-
-    // Silent suspect tracker check on login attempt
-    if (deviceId) {
-      fetch('/api/track', {
+  const handleLogin = async (rollNo: string, email: string) => {
+    try {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          device_id: deviceId,
           roll_no: rollNo,
-          email: email,
-          action_prefix: 'SUSPECT_LOGIN_ATTEMPT'
+          email,
+          device_id: deviceId
         })
-      }).catch(() => {});
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        if (data.locked) {
+          setIsLockedDown(true);
+          setLockdownMessage(data.error);
+        } else {
+          alert(data.error);
+        }
+        return;
+      }
+      localStorage.setItem('voter_roll', rollNo);
+      localStorage.setItem('voter_email', email);
+      setVoter({ rollNo, email });
+    } catch (err) {
+      console.error(err);
+      alert('Authentication server error. Please try again.');
     }
   };
 
@@ -124,6 +149,26 @@ export default function Home() {
     if (candidates.length === 0) return;
     setFocusIndex((prev) => (prev - 1 < -1 ? candidates.length - 1 : prev - 1));
   };
+
+  if (isLockedDown) {
+    return (
+      <main className="min-h-screen flex flex-col items-center justify-center bg-red-950 text-white p-6 relative font-sketch">
+        <div className="max-w-md w-full border-8 border-red-800 bg-red-900 rounded-lg p-8 shadow-2xl text-center space-y-6">
+          <h1 className="text-4xl font-bold tracking-wide text-yellow-400 drop-shadow">
+            🚨 DEVICE LOCKDOWN 🚨
+          </h1>
+          <p className="text-xl font-hand text-red-200 leading-relaxed">
+            {lockdownMessage || "This device has been permanently locked down due to suspicious multi-voter activities."}
+          </p>
+          <div className="border-t-2 border-dashed border-red-700 pt-4 text-xs font-mono text-red-400">
+            Device Fingerprint: {deviceId}<br />
+            IP Signature & Timestamp Logged.<br />
+            Contact Election Commission for verification.
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen flex flex-col bg-[#faf9f5] paper-grid paper-margin paper-texture relative py-12 px-4 sm:px-8">

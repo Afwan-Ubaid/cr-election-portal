@@ -47,18 +47,38 @@ export async function GET(req: NextRequest) {
       const auditRes = await client.query(auditQuery, [pollId]);
       
       const auditSummary = {
-        success: 0,
+        success: totalVotes, // Correctly display active valid votes
         duplicates: 0,
         invalidRolls: 0,
         totalAttempts: 0
       };
 
+      let rawSuccessCount = 0;
+      let rawDuplicatesCount = 0;
+      let suspectAttempts = 0;
+
       auditRes.rows.forEach(row => {
-        if (row.action === 'vote_success') auditSummary.success = row.count;
-        if (row.action === 'vote_attempt_duplicate') auditSummary.duplicates = row.count;
-        if (row.action === 'vote_attempt_invalid_roll') auditSummary.invalidRolls = row.count;
+        const action = row.action;
         auditSummary.totalAttempts += row.count;
+
+        if (action === 'vote_success') {
+          rawSuccessCount = row.count;
+        } else if (action === 'vote_attempt_duplicate') {
+          rawDuplicatesCount = row.count;
+        } else if (action === 'vote_attempt_invalid_roll') {
+          auditSummary.invalidRolls = row.count;
+        } else if (
+          action.startsWith('SUSPECT_') || 
+          action.startsWith('DEVICE_LOCKDOWN') || 
+          action === 'ADMIN_RESET_VOTE'
+        ) {
+          suspectAttempts += row.count;
+        }
       });
+
+      // Blocked duplicates / fraudulent attempts = (raw duplicates from log) + (votes that were success but deleted/reset) + (suspect login/visiting attempts)
+      const deletedSuccessVotes = Math.max(0, rawSuccessCount - totalVotes);
+      auditSummary.duplicates = rawDuplicatesCount + deletedSuccessVotes + suspectAttempts;
 
       // 5. Query duplicate device detections: check if same device_id is linked to > 1 roll_no
       const deviceCheckQuery = `

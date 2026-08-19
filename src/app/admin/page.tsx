@@ -49,11 +49,23 @@ export default function AdminDashboard() {
   // Status message state
   const [statusMessage, setStatusMessage] = useState('');
 
-  // 1. Password and email check on mount
+  // 1. Password, email, and device key check on mount
   useEffect(() => {
+    // Parse device_key query parameter if present
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const key = urlParams.get('device_key');
+      if (key) {
+        localStorage.setItem('admin_device_key', key);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+
     const isAuth = localStorage.getItem('admin_authenticated') === 'true';
     const savedEmail = localStorage.getItem('admin_email');
-    if (isAuth && savedEmail === 'afwanubaid9@gmail.com') {
+    const savedDeviceKey = localStorage.getItem('admin_device_key');
+
+    if (isAuth && savedEmail === 'afwanubaid9@gmail.com' && savedDeviceKey) {
       Promise.resolve().then(() => {
         setIsAuthenticated(true);
       });
@@ -66,10 +78,14 @@ export default function AdminDashboard() {
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const deviceKey = localStorage.getItem('admin_device_key') || '';
     try {
       const res = await fetch('/api/admin/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-admin-device-key': deviceKey
+        },
         body: JSON.stringify({ email: emailInput, password: passwordInput })
       });
       const data = await res.json();
@@ -131,13 +147,15 @@ export default function AdminDashboard() {
   const handleTogglePoll = async (open: boolean) => {
     const adminEmail = localStorage.getItem('admin_email') || '';
     const adminPassword = localStorage.getItem('admin_password') || '';
+    const deviceKey = localStorage.getItem('admin_device_key') || '';
     try {
       const res = await fetch('/api/admin/toggle', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'x-admin-email': adminEmail,
-          'x-admin-password': adminPassword
+          'x-admin-password': adminPassword,
+          'x-admin-device-key': deviceKey
         },
         body: JSON.stringify({ is_active: open })
       });
@@ -158,12 +176,14 @@ export default function AdminDashboard() {
     setIsLoading(true);
     const adminEmail = localStorage.getItem('admin_email') || '';
     const adminPassword = localStorage.getItem('admin_password') || '';
+    const deviceKey = localStorage.getItem('admin_device_key') || '';
     try {
       const res = await fetch('/api/admin/setup', { 
         method: 'POST',
         headers: { 
           'x-admin-email': adminEmail,
-          'x-admin-password': adminPassword 
+          'x-admin-password': adminPassword,
+          'x-admin-device-key': deviceKey
         }
       });
       const data = await res.json();
@@ -188,13 +208,15 @@ export default function AdminDashboard() {
     setIsLoading(true);
     const adminEmail = localStorage.getItem('admin_email') || '';
     const adminPassword = localStorage.getItem('admin_password') || '';
+    const deviceKey = localStorage.getItem('admin_device_key') || '';
     try {
       const res = await fetch('/api/admin/delete-vote', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'x-admin-email': adminEmail,
-          'x-admin-password': adminPassword
+          'x-admin-password': adminPassword,
+          'x-admin-device-key': deviceKey
         },
         body: JSON.stringify({ roll_no: rollNo })
       });
@@ -224,6 +246,7 @@ export default function AdminDashboard() {
     setFormError('');
     const adminEmail = localStorage.getItem('admin_email') || '';
     const adminPassword = localStorage.getItem('admin_password') || '';
+    const deviceKey = localStorage.getItem('admin_device_key') || '';
 
     try {
       const res = await fetch('/api/candidates', {
@@ -231,7 +254,8 @@ export default function AdminDashboard() {
         headers: { 
           'Content-Type': 'application/json',
           'x-admin-email': adminEmail,
-          'x-admin-password': adminPassword
+          'x-admin-password': adminPassword,
+          'x-admin-device-key': deviceKey
         },
         body: JSON.stringify({
           name: newCandName,
@@ -262,12 +286,14 @@ export default function AdminDashboard() {
     if (!confirm('Are you sure you want to delete this candidate? This will also remove any votes they have received.')) return;
     const adminEmail = localStorage.getItem('admin_email') || '';
     const adminPassword = localStorage.getItem('admin_password') || '';
+    const deviceKey = localStorage.getItem('admin_device_key') || '';
     try {
       const res = await fetch(`/api/candidates?id=${id}`, { 
         method: 'DELETE',
         headers: { 
           'x-admin-email': adminEmail,
-          'x-admin-password': adminPassword 
+          'x-admin-password': adminPassword,
+          'x-admin-device-key': deviceKey
         }
       });
       const data = await res.json();

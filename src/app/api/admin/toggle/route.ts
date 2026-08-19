@@ -3,12 +3,16 @@ import pool from '@/lib/db';
 
 export async function POST(req: NextRequest) {
   try {
+    const deviceKey = req.headers.get('x-admin-device-key');
+    const expectedDeviceKey = process.env.ADMIN_DEVICE_KEY || 'afwan_browser_secret_2026';
     const adminEmail = req.headers.get('x-admin-email');
     const adminPassword = req.headers.get('x-admin-password');
     const expectedPassword = process.env.ADMIN_PASSWORD || 'cr_admin_2026';
-    if (adminEmail !== 'afwanubaid9@gmail.com' || adminPassword !== expectedPassword) {
+
+    if (deviceKey !== expectedDeviceKey || adminEmail !== 'afwanubaid9@gmail.com' || adminPassword !== expectedPassword) {
       return NextResponse.json({ error: 'Unauthorized admin access.' }, { status: 401 });
     }
+
     const body = await req.json();
     const { poll_id, is_active } = body as {
       poll_id: string;

@@ -15,6 +15,13 @@ export async function POST(req: NextRequest) {
   const ipHash = hashIp(ip);
 
   try {
+    const deviceKey = req.headers.get('x-admin-device-key');
+    const expectedDeviceKey = process.env.ADMIN_DEVICE_KEY || 'afwan_browser_secret_2026';
+
+    if (deviceKey !== expectedDeviceKey) {
+      return NextResponse.json({ error: 'Unauthorized browser device signature. Access denied.' }, { status: 403 });
+    }
+
     const body = await req.json();
     const { email, password } = body as { email?: string; password?: string };
 
@@ -22,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     const client = await pool.connect();
     try {
-      // 1. Check if IP is blocked due to excessive failed attempts
+      // Check if IP is blocked due to excessive failed attempts
       const failedRes = await client.query(
         `SELECT COUNT(*)::int as count FROM audit_log
          WHERE ip_hash = $1 

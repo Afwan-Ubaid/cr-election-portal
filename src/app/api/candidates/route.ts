@@ -23,15 +23,19 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// 2. POST: Add candidate (Admin only check can be client side, but we execute in db)
+// 2. POST: Add candidate
 export async function POST(req: NextRequest) {
   try {
+    const deviceKey = req.headers.get('x-admin-device-key');
+    const expectedDeviceKey = process.env.ADMIN_DEVICE_KEY || 'afwan_browser_secret_2026';
     const adminEmail = req.headers.get('x-admin-email');
     const adminPassword = req.headers.get('x-admin-password');
     const expectedPassword = process.env.ADMIN_PASSWORD || 'cr_admin_2026';
-    if (adminEmail !== 'afwanubaid9@gmail.com' || adminPassword !== expectedPassword) {
+
+    if (deviceKey !== expectedDeviceKey || adminEmail !== 'afwanubaid9@gmail.com' || adminPassword !== expectedPassword) {
       return NextResponse.json({ error: 'Unauthorized admin access.' }, { status: 401 });
     }
+
     const body = await req.json();
     const { poll_id, name, manifesto, avatar_id } = body as {
       poll_id: string;
@@ -68,12 +72,16 @@ export async function POST(req: NextRequest) {
 // 3. DELETE: Remove candidate
 export async function DELETE(req: NextRequest) {
   try {
+    const deviceKey = req.headers.get('x-admin-device-key');
+    const expectedDeviceKey = process.env.ADMIN_DEVICE_KEY || 'afwan_browser_secret_2026';
     const adminEmail = req.headers.get('x-admin-email');
     const adminPassword = req.headers.get('x-admin-password');
     const expectedPassword = process.env.ADMIN_PASSWORD || 'cr_admin_2026';
-    if (adminEmail !== 'afwanubaid9@gmail.com' || adminPassword !== expectedPassword) {
+
+    if (deviceKey !== expectedDeviceKey || adminEmail !== 'afwanubaid9@gmail.com' || adminPassword !== expectedPassword) {
       return NextResponse.json({ error: 'Unauthorized admin access.' }, { status: 401 });
     }
+
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
 

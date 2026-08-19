@@ -3,11 +3,13 @@ import pool from '@/lib/db';
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Password verification check
+    const deviceKey = req.headers.get('x-admin-device-key');
+    const expectedDeviceKey = process.env.ADMIN_DEVICE_KEY || 'afwan_browser_secret_2026';
     const adminEmail = req.headers.get('x-admin-email');
     const adminPassword = req.headers.get('x-admin-password');
     const expectedPassword = process.env.ADMIN_PASSWORD || 'cr_admin_2026';
-    if (adminEmail !== 'afwanubaid9@gmail.com' || adminPassword !== expectedPassword) {
+
+    if (deviceKey !== expectedDeviceKey || adminEmail !== 'afwanubaid9@gmail.com' || adminPassword !== expectedPassword) {
       return NextResponse.json({ error: 'Unauthorized admin access.' }, { status: 401 });
     }
 
@@ -23,7 +25,6 @@ export async function POST(req: NextRequest) {
 
     const client = await pool.connect();
     try {
-      // 2. Begin transaction
       await client.query('BEGIN');
 
       // Check if vote exists
@@ -47,7 +48,6 @@ export async function POST(req: NextRequest) {
 
       // Log the deletion to audit logs
       const ip = req.headers.get('x-forwarded-for')?.split(',')[0] ?? req.headers.get('x-real-ip') ?? 'unknown';
-      // simple hash for admin ip
       let h = 0;
       for (let i = 0; i < ip.length; i++) {
         h = (h << 5) - h + ip.charCodeAt(i);

@@ -28,6 +28,7 @@ interface FlaggedDevice {
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [emailInput, setEmailInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
@@ -48,12 +49,18 @@ export default function AdminDashboard() {
   // Status message state
   const [statusMessage, setStatusMessage] = useState('');
 
-  // 1. Password check on mount
+  // 1. Password and email check on mount
   useEffect(() => {
-    if (localStorage.getItem('admin_authenticated') === 'true') {
+    const isAuth = localStorage.getItem('admin_authenticated') === 'true';
+    const savedEmail = localStorage.getItem('admin_email');
+    if (isAuth && savedEmail === 'afwanubaid9@gmail.com') {
       Promise.resolve().then(() => {
         setIsAuthenticated(true);
       });
+    } else {
+      localStorage.removeItem('admin_authenticated');
+      localStorage.removeItem('admin_email');
+      localStorage.removeItem('admin_password');
     }
   }, []);
 
@@ -63,16 +70,17 @@ export default function AdminDashboard() {
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: passwordInput })
+        body: JSON.stringify({ email: emailInput, password: passwordInput })
       });
       const data = await res.json();
       if (res.ok) {
         setIsAuthenticated(true);
         setPasswordError('');
         localStorage.setItem('admin_authenticated', 'true');
+        localStorage.setItem('admin_email', emailInput);
         localStorage.setItem('admin_password', passwordInput);
       } else {
-        setPasswordError(data.error || 'Incorrect admin password. Please try again.');
+        setPasswordError(data.error || 'Incorrect admin credentials. Please try again.');
       }
     } catch (err) {
       console.error(err);
@@ -121,12 +129,14 @@ export default function AdminDashboard() {
   }, [isAuthenticated]);
 
   const handleTogglePoll = async (open: boolean) => {
+    const adminEmail = localStorage.getItem('admin_email') || '';
     const adminPassword = localStorage.getItem('admin_password') || '';
     try {
       const res = await fetch('/api/admin/toggle', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
+          'x-admin-email': adminEmail,
           'x-admin-password': adminPassword
         },
         body: JSON.stringify({ is_active: open })
@@ -146,11 +156,15 @@ export default function AdminDashboard() {
   const handleSetupDatabase = async () => {
     if (!confirm('This will wipe all active votes and restart all counts back to zero. Are you sure?')) return;
     setIsLoading(true);
+    const adminEmail = localStorage.getItem('admin_email') || '';
     const adminPassword = localStorage.getItem('admin_password') || '';
     try {
       const res = await fetch('/api/admin/setup', { 
         method: 'POST',
-        headers: { 'x-admin-password': adminPassword }
+        headers: { 
+          'x-admin-email': adminEmail,
+          'x-admin-password': adminPassword 
+        }
       });
       const data = await res.json();
       if (res.ok) {
@@ -172,12 +186,14 @@ export default function AdminDashboard() {
       return;
     }
     setIsLoading(true);
+    const adminEmail = localStorage.getItem('admin_email') || '';
     const adminPassword = localStorage.getItem('admin_password') || '';
     try {
       const res = await fetch('/api/admin/delete-vote', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
+          'x-admin-email': adminEmail,
           'x-admin-password': adminPassword
         },
         body: JSON.stringify({ roll_no: rollNo })
@@ -206,6 +222,7 @@ export default function AdminDashboard() {
     }
     setIsAdding(true);
     setFormError('');
+    const adminEmail = localStorage.getItem('admin_email') || '';
     const adminPassword = localStorage.getItem('admin_password') || '';
 
     try {
@@ -213,6 +230,7 @@ export default function AdminDashboard() {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
+          'x-admin-email': adminEmail,
           'x-admin-password': adminPassword
         },
         body: JSON.stringify({
@@ -242,11 +260,15 @@ export default function AdminDashboard() {
 
   const handleDeleteCandidate = async (id: string) => {
     if (!confirm('Are you sure you want to delete this candidate? This will also remove any votes they have received.')) return;
+    const adminEmail = localStorage.getItem('admin_email') || '';
     const adminPassword = localStorage.getItem('admin_password') || '';
     try {
       const res = await fetch(`/api/candidates?id=${id}`, { 
         method: 'DELETE',
-        headers: { 'x-admin-password': adminPassword }
+        headers: { 
+          'x-admin-email': adminEmail,
+          'x-admin-password': adminPassword 
+        }
       });
       const data = await res.json();
       if (res.ok) {
@@ -300,6 +322,17 @@ export default function AdminDashboard() {
             Teacher Desk Login
           </h1>
           <form onSubmit={handlePasswordSubmit} className="space-y-6">
+            <div className="text-left">
+              <label className="block text-sm text-slate-300 mb-2">Admin Email:</label>
+              <input
+                type="email"
+                placeholder="Enter admin email..."
+                value={emailInput}
+                onChange={(e) => setEmailInput(e.target.value)}
+                className="w-full px-4 py-3 bg-emerald-950/50 border-2 border-slate-400 rounded-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-yellow-300 text-lg"
+              />
+            </div>
+
             <div className="text-left">
               <label className="block text-sm text-slate-300 mb-2">Admin Password:</label>
               <input

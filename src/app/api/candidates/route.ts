@@ -26,9 +26,10 @@ export async function GET(req: NextRequest) {
 // 2. POST: Add candidate (Admin only check can be client side, but we execute in db)
 export async function POST(req: NextRequest) {
   try {
+    const adminEmail = req.headers.get('x-admin-email');
     const adminPassword = req.headers.get('x-admin-password');
     const expectedPassword = process.env.ADMIN_PASSWORD || 'cr_admin_2026';
-    if (adminPassword !== expectedPassword) {
+    if (adminEmail !== 'afwanubaid9@gmail.com' || adminPassword !== expectedPassword) {
       return NextResponse.json({ error: 'Unauthorized admin access.' }, { status: 401 });
     }
     const body = await req.json();
@@ -67,9 +68,10 @@ export async function POST(req: NextRequest) {
 // 3. DELETE: Remove candidate
 export async function DELETE(req: NextRequest) {
   try {
+    const adminEmail = req.headers.get('x-admin-email');
     const adminPassword = req.headers.get('x-admin-password');
     const expectedPassword = process.env.ADMIN_PASSWORD || 'cr_admin_2026';
-    if (adminPassword !== expectedPassword) {
+    if (adminEmail !== 'afwanubaid9@gmail.com' || adminPassword !== expectedPassword) {
       return NextResponse.json({ error: 'Unauthorized admin access.' }, { status: 401 });
     }
     const { searchParams } = new URL(req.url);

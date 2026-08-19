@@ -4,9 +4,10 @@ import pool from '@/lib/db';
 export async function POST(req: NextRequest) {
   try {
     // 1. Password verification check
+    const adminEmail = req.headers.get('x-admin-email');
     const adminPassword = req.headers.get('x-admin-password');
     const expectedPassword = process.env.ADMIN_PASSWORD || 'cr_admin_2026';
-    if (adminPassword !== expectedPassword) {
+    if (adminEmail !== 'afwanubaid9@gmail.com' || adminPassword !== expectedPassword) {
       return NextResponse.json({ error: 'Unauthorized admin access.' }, { status: 401 });
     }
 

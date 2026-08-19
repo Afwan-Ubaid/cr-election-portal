@@ -18,6 +18,12 @@ export async function POST(req: NextRequest) {
     const sqlPath = path.join(process.cwd(), 'init.sql');
     const sqlContent = fs.readFileSync(sqlPath, 'utf8');
 
+    const seedVotersPath = path.join(process.cwd(), 'seed_voters.sql');
+    let seedVotersContent = '';
+    if (fs.existsSync(seedVotersPath)) {
+      seedVotersContent = fs.readFileSync(seedVotersPath, 'utf8');
+    }
+
     const client = await pool.connect();
     try {
       // 1. Force drop all tables to guarantee a complete clean state
@@ -32,9 +38,14 @@ export async function POST(req: NextRequest) {
       // 2. Re-create and seed tables from init.sql
       await client.query(sqlContent);
       
+      // 3. Seed private voter list if available
+      if (seedVotersContent) {
+        await client.query(seedVotersContent);
+      }
+      
       return NextResponse.json({ 
         success: true, 
-        message: 'Database tables successfully recreated. All vote logs cleared, and candidates reset to zero.' 
+        message: 'Database tables successfully recreated. All vote logs cleared, candidates reset to zero, and private voter list seeded if present.' 
       });
     } finally {
       client.release();
